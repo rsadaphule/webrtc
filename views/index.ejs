@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" >
+    <head>
+            <title>Introduction to webrtc</title>
+            <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+    <body>
+            <div>
+                Video : <select id="camera">  </select>
+            </div>
+            <video autoplay> </video>
+
+
+
+            <script type="text/javascript">
+            function startStream()
+            {
+
+                        var videoSource = videoSelect.value;
+                        console.log("inside start stream");
+                        console.log(videoSource)
+
+                     
+                        navigator.mediaDevices.getUserMedia(
+                                                            {
+                                                                video: {
+                                                                    mandatory: {
+                                                                        maxWidth: 640,
+                                                                        maxheight: 360
+                                                                    },
+                                                                    optional:[
+                                                                        {
+                                                                            sourceId: videoSource
+                                                                        }
+                                                                    ]
+                                                                }, 
+                                                                audio: false
+                                                            })
+                        .then(mediaStream => {
+                                myVideo = document.querySelector('video');
+                                myVideo.srcObject = mediaStream;
+                                myVideo.className = "grayscale_filter";
+                                myVideo.play();
+
+                        })
+                        .catch(error => {
+                        console.log(error);
+                        });
+            }
+
+            var videoSelect = document.querySelector("#camera");
+           
+            navigator.mediaDevices.enumerateDevices()
+            .then(function (devices) {
+                devices.forEach(function (device) {
+                    var option = document.createElement('option');
+                    option.value = device.deviceId;
+                    
+                    //console.log(device.kind);
+                    
+                    if (device.kind === 'videoinput') {
+                        option.text = device.label || 'camera' + (videoSelect.length + 1);
+                        //console.log("inside if")
+                        console.log(option);
+                        videoSelect.appendChild(option);
+                    }
+                    /*
+                    else if (device.kind == 'audioinput') {
+                        option.text = device.label || 'mic' + (audioSelect.length + 1);
+                        audioSelect.appendChild(option);
+                    }
+                    */
+                });
+            })
+        .catch(function (err) {
+            console.log(err.name + ": " + err.message);
+        });
+            
+            videoSelect.onchange = startStream;
+
+
+            function getCameras(sourceInfos)
+            {
+                for (var i = 0; i < sourceInfos.length; ++i)
+                {
+                    var sourceInfo = sourceInfos[i];
+                    var option = document.createElement("option");;
+                    option.value = sourceInfo.id;
+                    if (sourceInfo.kind == "video") {
+                        option.text = sourceInfo.label || 'camera ' + (videoSelect.length +1 );
+                        videoSelect.appendChild(option);
+
+                    }
+                }
+            }
+
+            startStream();
+
+            
+            
+            
+            </script>
+
+    </body>
+
+</html>
