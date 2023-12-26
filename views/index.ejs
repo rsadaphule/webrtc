@@ -8,25 +8,90 @@
             <div>
                 Video : <select id="camera">  </select>
             </div>
-            <video autoplay> </video>
+            <p><button id="getProfilePic" type="button" autofocus="true">Create Profile Picture</button></p>
+            <canvas id="profileCanvas" style="display: none;"></canvas>
+            <div>
+                <img id="profilePictureOutput" />
+            </div>
+
+
+            <video id="videoElement" autoplay> </video>
 
 
 
             <script type="text/javascript">
+            var width = 240;
+            var height = width / (4/3);
+            var IsStreaming = false; 
+
+            var videoSelect = document.querySelector("#camera");
+            var myVideo = document.querySelector('#videoElement');
+            var profileCanvas = document.querySelector("#profileCanvas");
+            var profilePicOutputImage = document.querySelector("#profilePictureOutput");
+            var takePhotoButton = document.querySelector("#getProfilePic");
+               
+            takePhotoButton.addEventListener("click", function(event) {
+                takeProfilePicture()
+                event.preventDefault();
+            
+            
+            }, false);
+
+
+            myVideo.addEventListener("canPlay", function(event) {
+                console.log("inside can play")
+                if(!isStreaming)
+                {
+                    height = myVideo.videoHeight;
+                    if (isNaN(height)) {
+                         height = width / (4/3);
+                    }
+                    console.log("about to stream")
+                    myVideo.setAttribute("height", height);
+                    myVideo.setAttributes("width", width);
+                    profileCanvas.setAttribute("height", height);
+                    profileCanvas.setAttribute("width", width);
+                    isStreaming = true;
+                    
+
+                }
+
+
+            }, false);
+
+            function takeProfilePicture()
+            {
+                console.log("inside takeProfilePicture")
+                var context = profileCanvas.getContext("2d");
+                if (width && height) {
+                    profileCanvas.width = width ;
+                    profileCanvas.height = height ;
+                    console.log("just before drawing  image on canvas")
+                    context.drawImage(myVideo, 0, 0, width, height);
+                    var data = profileCanvas.toDataURL('image/png');
+                    profilePicOutputImage.setAttribute("src", data);
+               
+                }
+
+
+
+            }
+
+
+
             function startStream()
             {
 
                         var videoSource = videoSelect.value;
-                        console.log("inside start stream");
-                        console.log(videoSource)
-
                      
                         navigator.mediaDevices.getUserMedia(
                                                             {
                                                                 video: {
                                                                     mandatory: {
-                                                                        maxWidth: 640,
-                                                                        maxheight: 360
+                                                                        maxWidth: 240,
+                                                                        maxheight: 240,
+                                                                        minHeight: 240,
+                                                                        maxWidth: 240
                                                                     },
                                                                     optional:[
                                                                         {
@@ -39,7 +104,7 @@
                         .then(mediaStream => {
                                 myVideo = document.querySelector('video');
                                 myVideo.srcObject = mediaStream;
-                                myVideo.className = "grayscale_filter";
+                                //myVideo.className = "grayscale_filter";
                                 myVideo.play();
 
                         })
@@ -48,7 +113,7 @@
                         });
             }
 
-            var videoSelect = document.querySelector("#camera");
+            
            
             navigator.mediaDevices.enumerateDevices()
             .then(function (devices) {
